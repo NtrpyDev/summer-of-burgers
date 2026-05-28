@@ -25,9 +25,13 @@ bash scripts/linux/deploy-pages.sh
 
 # Or both via collector pipeline
 bash scripts/linux/collect-and-sync.sh
+
+# Force a sync/deploy even when the collector imports nothing
+FORCE_SYNC=1 bash scripts/linux/collect-and-sync.sh
 ```
 
 `deploy-pages.sh` alone skips R2/D1 unless you omit `SKIP_SYNC`.
+`sync-to-cloudflare.sh` applies all normal migrations and re-seeds archive metadata without overwriting live vote totals, Elo, approval state, or creation timestamps.
 
 ## Cloudflare bindings
 

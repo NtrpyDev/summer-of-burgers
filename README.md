@@ -21,7 +21,7 @@ npx wrangler login
 bash scripts/linux/install-server.sh
 ```
 
-That installs a **30-minute** systemd user timer: collect tweets → AI burger check → sync R2/D1 → deploy Pages.
+That installs a **30-minute** systemd user timer. It collects tweets and runs the AI burger check every time, then syncs R2/D1 and deploys Pages only when a new burger imports.
 
 Logs: `data/collector-schedule.log`
 
@@ -52,6 +52,6 @@ X does **not** push to your server. The timer **polls** for new `@BarstoolBigCat
 
 ## Privacy
 
-The public site has no owner PII, analytics, submitter names, or emails. Votes use a salted hash of a random browser token (`VOTE_SALT` in Cloudflare). Fan upload IPs are hashed, not stored raw.
+The public site has no owner PII, analytics, submitter names, or emails. Votes use a salted hash of a server-signed browser token (`VOTE_SALT` in Cloudflare), plus hashed per-network daily throttles. Fan upload IPs are hashed, not stored raw.
 
 See [DEPLOY.md](DEPLOY.md) for Cloudflare bindings and `VOTE_SALT`.
