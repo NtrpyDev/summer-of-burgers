@@ -3,6 +3,7 @@ DELETE FROM head_to_head_votes;
 DELETE FROM fan_head_to_head_votes;
 DELETE FROM bracket_runs;
 DELETE FROM daily_vote_limits;
+DELETE FROM vote_ip_daily;
 
 UPDATE burgers SET
   elo = 1500,
