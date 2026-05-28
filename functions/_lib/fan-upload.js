@@ -1,3 +1,11 @@
+import {
+  clientIp,
+  currentVoteDay,
+  hashIp,
+  nextResetIso,
+  validVoterId
+} from "./voting.js";
+
 export const FAN_UPLOAD = {
   maxBytes: 6 * 1024 * 1024,
   minBytes: 4 * 1024,
@@ -11,10 +19,6 @@ export const FAN_UPLOAD = {
   voteType: "fan_submit"
 };
 
-export function validVoterId(value) {
-  return /^[a-zA-Z0-9_-]{24,96}$/.test(value);
-}
-
 export async function hashVoter(voterId, env) {
   const salt = env.VOTE_SALT || "summer-of-burgers-dev-salt";
   const bytes = new TextEncoder().encode(`${salt}:voter:${voterId}`);
@@ -22,40 +26,8 @@ export async function hashVoter(voterId, env) {
   return toHex(digest);
 }
 
-export async function hashIp(ip, env) {
-  const salt = env.VOTE_SALT || "summer-of-burgers-dev-salt";
-  const bytes = new TextEncoder().encode(`${salt}:ip:${ip}`);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return toHex(digest);
-}
-
-export function clientIp(request) {
-  const header = request.headers.get("CF-Connecting-IP") || request.headers.get("X-Forwarded-For") || "";
-  const ip = header.split(",")[0].trim();
-  return ip || "local-dev";
-}
-
-export function currentUploadDay(date = new Date()) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/New_York",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  }).formatToParts(date).reduce((acc, part) => {
-    acc[part.type] = part.value;
-    return acc;
-  }, {});
-  return `${parts.year}-${parts.month}-${parts.day}`;
-}
-
-export function nextResetIso() {
-  const now = new Date();
-  const easternNow = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
-  const easternReset = new Date(easternNow);
-  easternReset.setDate(easternReset.getDate() + 1);
-  easternReset.setHours(0, 0, 0, 0);
-  return easternReset.toISOString();
-}
+export const currentUploadDay = currentVoteDay;
+export { clientIp, hashIp, nextResetIso, validVoterId };
 
 export function cleanText(value) {
   return String(value || "").replace(/\s+/g, " ").trim();

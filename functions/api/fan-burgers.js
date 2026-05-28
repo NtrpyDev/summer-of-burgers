@@ -12,6 +12,10 @@ import {
   validateFanImage,
   validVoterId
 } from "../_lib/fan-upload.js";
+import {
+  resolveVoterIdentity,
+  responseWithVoterCookie
+} from "../_lib/voting.js";
 
 export async function onRequestGet(context) {
   const { env } = context;
@@ -53,13 +57,18 @@ export async function onRequestPost(context) {
 
   const form = await request.formData();
   const voterId = String(form.get("voterId") || "");
-  if (!validVoterId(voterId)) {
+  const identity = await resolveVoterIdentity(request, env, voterId);
+  if (!validVoterId(identity.voterId)) {
     return Response.json({ error: "Valid browser token is required" }, { status: 400 });
   }
 
-  const gate = await assertFanUploadAllowed(env, voterId, request);
+  const gate = await assertFanUploadAllowed(env, identity.voterId, request);
   if (!gate.allowed) {
-    return Response.json({ error: gate.error, allowed: false, nextReset: gate.nextReset }, { status: gate.status || 429 });
+    return responseWithVoterCookie(
+      { error: gate.error, allowed: false, nextReset: gate.nextReset },
+      identity,
+      { status: gate.status || 429 }
+    );
   }
 
   const title = cleanText(form.get("title") || "Fan burger").slice(0, 72);
@@ -84,7 +93,7 @@ export async function onRequestPost(context) {
   const { format } = checked;
   const id = `fan-${crypto.randomUUID()}`;
   const imageKey = `fan/${id}.${format.ext}`;
-  const voterHash = await hashVoter(voterId, env);
+  const voterHash = await hashVoter(identity.voterId, env);
   const ipHash = await hashIp(clientIp(request), env);
 
   await env.BURGER_IMAGES.put(imageKey, bytes, {
@@ -119,16 +128,20 @@ export async function onRequestPost(context) {
   } catch (error) {
     await env.BURGER_IMAGES.delete(imageKey);
     if (isLimitError(error)) {
-      const status = await getFanUploadStatus(env, voterId, request);
+      const status = await getFanUploadStatus(env, identity.voterId, request);
       const message = status.reason === "daily_ip"
         ? "Too many uploads from this network today. Try again tomorrow."
         : "You already submitted a fan burger today. Come back tomorrow.";
-      return Response.json({ error: message, allowed: false, nextReset: status.nextReset }, { status: 429 });
+      return responseWithVoterCookie(
+        { error: message, allowed: false, nextReset: status.nextReset },
+        identity,
+        { status: 429 }
+      );
     }
     throw error;
   }
 
-  return Response.json({
+  return responseWithVoterCookie({
     id,
     title: title || "Fan burger",
     caption,
@@ -141,5 +154,5 @@ export async function onRequestPost(context) {
     wins: 0,
     losses: 0,
     created_at: new Date().toISOString()
-  }, { status: 201 });
+  }, identity, { status: 201 });
 }
