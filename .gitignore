@@ -1,4 +1,6 @@
 .env
+
+# Local tool caches and dependencies
 .collector-profile/
 .tools/
 .wrangler/
@@ -6,6 +8,8 @@
 node_modules/
 node_modules/.cache/
 .dev.vars
+
+# Collector state, generated deploy files, and local vote limits
 data/failed/
 data/collector-state.json
 data/collector-schedule.log
@@ -16,6 +20,8 @@ data/deploy-bundle.tgz
 data/_upload-once.cjs
 data/*.png
 .cursor/
+
+# Images are generated locally and uploaded to R2.
 public/images/originals/*
 public/images/thumbs/*
 public/images/fan/*
