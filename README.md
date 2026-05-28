@@ -4,7 +4,7 @@ Unofficial fan archive for Big Cat's Summer of Burgers posts. Gallery, daily bur
 
 **Live site:** https://summerofburgers.site
 
-Runs on a **Linux server** (systemd timer). No Windows scripts in this repo.
+Runs on a **Linux server** (systemd timer).
 
 ## Server setup (one time)
 
