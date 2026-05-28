@@ -10,16 +10,17 @@
     "collector:list": "node scripts/collector.cjs --list-campaign",
     "share-cards": "node scripts/generate-share-cards.cjs",
     "normalize": "node scripts/normalize-archive.cjs",
+    "audit:prod": "npm audit --omit=dev --audit-level=high",
     "test": "node scripts/smoke-test.cjs"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "latest",
-    "wrangler": "latest"
+    "@cloudflare/workers-types": "4.20260528.1",
+    "wrangler": "4.95.0"
   },
   "dependencies": {
-    "@xdevplatform/xdk": "^0.5.0",
-    "@xenova/transformers": "^2.17.2",
-    "sharp": "latest"
+    "@huggingface/transformers": "4.2.0",
+    "@xdevplatform/xdk": "0.5.0",
+    "sharp": "0.34.5"
   },
   "overrides": {
     "sharp": "$sharp"

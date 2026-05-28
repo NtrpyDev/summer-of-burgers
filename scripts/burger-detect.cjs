@@ -21,7 +21,7 @@ let classifierPromise;
 async function getClassifier() {
   if (!classifierPromise) {
     classifierPromise = (async () => {
-      const { pipeline, env } = await import("@xenova/transformers");
+      const { pipeline, env } = await import("@huggingface/transformers");
       env.cacheDir = cacheDir;
       env.allowLocalModels = true;
       console.log("Loading burger vision model (first run downloads ~150MB once)...");
@@ -32,7 +32,7 @@ async function getClassifier() {
 }
 
 async function isBurgerImage(buffer) {
-  const { RawImage } = await import("@xenova/transformers");
+  const { RawImage } = await import("@huggingface/transformers");
   const sharp = requireSharp();
   const classifier = await getClassifier();
   const jpeg = await sharp(buffer).rotate().resize(384, 384, { fit: "inside" }).jpeg({ quality: 85 }).toBuffer();
