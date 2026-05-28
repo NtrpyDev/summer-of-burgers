@@ -30,9 +30,9 @@ for dir in originals thumbs fan share; do
   done
 done
 
-"$WRANGLER" d1 execute "$DB" --file migrations/0001_schema.sql --remote --yes
-if [[ -f migrations/0002_fan_upload_limits.sql ]]; then
-  "$WRANGLER" d1 execute "$DB" --file migrations/0002_fan_upload_limits.sql --remote --yes
-fi
+for migration in migrations/*.sql; do
+  [[ "$(basename "$migration")" == "0003_launch_reset.sql" ]] && continue
+  "$WRANGLER" d1 execute "$DB" --file "$migration" --remote --yes
+done
 "$WRANGLER" d1 execute "$DB" --file data/seed-burgers.sql --remote --yes
 echo "Cloudflare sync finished."

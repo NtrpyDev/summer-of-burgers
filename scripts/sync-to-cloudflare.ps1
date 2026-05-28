@@ -19,9 +19,11 @@ try {
   }
 
   & $Node "scripts\export-d1-sql.cjs"
-  Invoke-Wrangler d1 execute $Database --file "migrations\0001_schema.sql" --remote --yes
-  if (Test-Path "migrations\0002_fan_upload_limits.sql") {
-    Invoke-Wrangler d1 execute $Database --file "migrations\0002_fan_upload_limits.sql" --remote --yes
+  foreach ($Migration in Get-ChildItem "migrations\*.sql" | Sort-Object Name) {
+    if ($Migration.Name -eq "0003_launch_reset.sql") {
+      continue
+    }
+    Invoke-Wrangler d1 execute $Database --file $Migration.FullName --remote --yes
   }
   Invoke-Wrangler d1 execute $Database --file "data\seed-burgers.sql" --remote --yes
   Write-Host "Cloudflare sync finished."

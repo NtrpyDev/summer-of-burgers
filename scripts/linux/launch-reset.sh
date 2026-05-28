@@ -6,6 +6,10 @@ WRANGLER="./node_modules/.bin/wrangler"
 DB="summer-of-burgers"
 
 echo "Resetting production D1 (votes, limits, Elo)..."
+for migration in migrations/*.sql; do
+  [[ "$(basename "$migration")" == "0003_launch_reset.sql" ]] && continue
+  "$WRANGLER" d1 execute "$DB" --file "$migration" --remote --yes
+done
 "$WRANGLER" d1 execute "$DB" --file migrations/0003_launch_reset.sql --remote --yes
 echo "Re-seeding burgers from local archive..."
 node scripts/export-d1-sql.cjs

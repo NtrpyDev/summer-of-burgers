@@ -7,7 +7,7 @@ const fanBurgersPath = path.join(root, "public", "data", "fan-burgers.json");
 const fanBurgers = fs.existsSync(fanBurgersPath) ? JSON.parse(fs.readFileSync(fanBurgersPath, "utf8")) : [];
 
 const statements = burgers.map((burger) => `
-INSERT OR REPLACE INTO burgers (
+INSERT INTO burgers (
   id, tweet_id, source_url, posted_at, caption, media_index, r2_key, thumb_key,
   image_url, thumb_url, image_hash, perceptual_hash, category, tags, elo, wins,
   losses, bracket_wins, created_at, updated_at
@@ -18,11 +18,26 @@ INSERT OR REPLACE INTO burgers (
   ${sql(burger.perceptual_hash)}, ${sql(burger.category || "unknown")}, ${sql(JSON.stringify(burger.tags || []))},
   ${Number(burger.elo || 1500)}, ${Number(burger.wins || 0)}, ${Number(burger.losses || 0)},
   ${Number(burger.bracket_wins || 0)}, ${sql(burger.created_at)}, ${sql(burger.updated_at)}
-);`.trim());
+)
+ON CONFLICT(id) DO UPDATE SET
+  tweet_id = excluded.tweet_id,
+  source_url = excluded.source_url,
+  posted_at = excluded.posted_at,
+  caption = excluded.caption,
+  media_index = excluded.media_index,
+  r2_key = excluded.r2_key,
+  thumb_key = excluded.thumb_key,
+  image_url = excluded.image_url,
+  thumb_url = excluded.thumb_url,
+  image_hash = excluded.image_hash,
+  perceptual_hash = excluded.perceptual_hash,
+  category = excluded.category,
+  tags = excluded.tags,
+  updated_at = CURRENT_TIMESTAMP;`.trim());
 
 for (const burger of fanBurgers) {
   statements.push(`
-INSERT OR REPLACE INTO fan_burgers (
+INSERT INTO fan_burgers (
   id, title, caption, image_key, thumb_key, image_url, thumb_url, image_hash,
   elo, wins, losses, approved, created_at, updated_at
 ) VALUES (
@@ -31,7 +46,16 @@ INSERT OR REPLACE INTO fan_burgers (
   ${sql(burger.thumb_url?.startsWith("/api/") ? burger.thumb_url : `/api/image/${burger.thumb_key}`)},
   ${sql(burger.image_hash)}, ${Number(burger.elo || 1500)}, ${Number(burger.wins || 0)}, ${Number(burger.losses || 0)},
   1, ${sql(burger.created_at)}, ${sql(burger.updated_at)}
-);`.trim());
+)
+ON CONFLICT(id) DO UPDATE SET
+  title = excluded.title,
+  caption = excluded.caption,
+  image_key = excluded.image_key,
+  thumb_key = excluded.thumb_key,
+  image_url = excluded.image_url,
+  thumb_url = excluded.thumb_url,
+  image_hash = excluded.image_hash,
+  updated_at = CURRENT_TIMESTAMP;`.trim());
 }
 
 const out = path.join(root, "data", "seed-burgers.sql");
