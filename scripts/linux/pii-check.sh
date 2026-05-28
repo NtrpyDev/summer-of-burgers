@@ -30,6 +30,7 @@ fi
 
 scan "home LAN IP" '192\.168\.[0-9]+\.[0-9]+'
 scan "hardcoded password in repo" 'password\s*=\s*["\x27][^"\x27]{8,}'
+scan "password passed through CLI args" 'password\s*=\s*process\.argv|process\.argv.*password|username:.*password'
 scan "Bearer / API tokens" 'Bearer [A-Za-z0-9%]{30,}|gho_[A-Za-z0-9]+|X_BEARER_TOKEN=[^#\s]{20,}'
 scan "private email" '@gmail\.com|@yahoo\.com|@hotmail\.com|@outlook\.com'
 
