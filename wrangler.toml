@@ -1,0 +1,12 @@
+name = "summer-of-burgers"
+compatibility_date = "2026-05-28"
+pages_build_output_dir = "public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "summer-of-burgers"
+database_id = "9c0bb0a2-f25d-4829-a704-865bed67370f"
+
+[[r2_buckets]]
+binding = "BURGER_IMAGES"
+bucket_name = "summer-of-burgers-images"
