@@ -3,7 +3,6 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 
-git rm -f functions/api/bracket.js scripts/refresh-bearer.cjs scripts/refresh-bearer.cmd COPY-PASTE-DEPLOY.md 2>/dev/null || true
 git add -A
 if git diff --cached --quiet; then
   echo "Nothing to sync."

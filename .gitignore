@@ -1,10 +1,10 @@
 .env
 .collector-profile/
 .tools/
+.wrangler/
 .cache/
 node_modules/
 node_modules/.cache/
-.wrangler/
 .dev.vars
 data/failed/
 data/collector-state.json
@@ -13,6 +13,7 @@ data/local-vote-limits.json
 data/local-fan-upload-ip.json
 data/seed-burgers.sql
 data/deploy-bundle.tgz
+data/_upload-once.cjs
 data/*.png
 .cursor/
 public/images/originals/*

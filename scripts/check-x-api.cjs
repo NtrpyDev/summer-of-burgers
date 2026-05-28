@@ -30,7 +30,7 @@ Fix (from X docs):
 3. Paste Bearer into .env as X_BEARER_TOKEN=...
 4. Test in browser/docs curl:
    curl "https://api.x.com/2/users/by/username/BarstoolBigCat" -H "Authorization: Bearer YOUR_TOKEN"
-5. Run: .\\scripts\\check-x-api.cmd
+5. Run: bash scripts/linux/check-x-api.sh
 
 Docs: https://docs.x.com/x-api/getting-started/make-your-first-request
 `);

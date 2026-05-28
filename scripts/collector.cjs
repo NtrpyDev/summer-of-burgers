@@ -115,7 +115,7 @@ async function main() {
     console.log(`State saved (last seen tweet ${state.lastSeenTweetId}).`);
   }
   if (summary.imported > 0) {
-    console.log(`Added ${summary.imported} burger(s) to the archive. Run .\\scripts\\collect-and-sync.cmd to publish.`);
+    console.log(`Added ${summary.imported} burger(s) to the archive. Run: bash scripts/linux/collect-and-sync.sh`);
   }
 }
 
@@ -170,7 +170,7 @@ async function rebuildArchiveFromVision() {
   const removed = await pruneOrphanImages(burgers);
   console.log(`Rebuild done: ${imported} burgers kept, ${notBurger} non-burger tweets dropped.`);
   if (removed) console.log(`Removed ${removed} leftover image file(s) from public/images.`);
-  console.log("Run .\\scripts\\collect-and-sync.cmd to publish.");
+  console.log("Run: bash scripts/linux/collect-and-sync.sh");
 }
 
 async function pruneOrphanImages(burgers) {

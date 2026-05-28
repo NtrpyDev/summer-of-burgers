@@ -37,7 +37,7 @@ function apiErrorMessage(error) {
   if (status === 401) {
     return (
       `X API 401 Unauthorized. Per https://docs.x.com/x-api/getting-started/make-your-first-request ` +
-      `regenerate Bearer Token in console.x.com (Keys and tokens) after any API Key regen, update .env, then run .\\scripts\\check-x-api.cmd. (${detail})`
+      `regenerate Bearer Token in console.x.com (Keys and tokens) after any API Key regen, update .env, then run: bash scripts/linux/check-x-api.sh (${detail})`
     );
   }
   return detail;

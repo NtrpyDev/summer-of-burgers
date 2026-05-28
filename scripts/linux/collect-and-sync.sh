@@ -12,4 +12,5 @@ mkdir -p "$ROOT/data"
   echo "============================================================"
   node scripts/collector.cjs
   bash scripts/linux/sync-to-cloudflare.sh
+  SKIP_SYNC=1 bash scripts/linux/deploy-pages.sh
 } >>"$LOG" 2>&1

@@ -1,169 +1,57 @@
 # Summer of Burgers Tracker
 
-Unofficial fan archive for Big Cat's Summer of Burgers posts. The app includes a newest-first searchable gallery, a daily head-to-head burger vote, and a separate fan burger submission/voting lane.
+Unofficial fan archive for Big Cat's Summer of Burgers posts. Gallery, daily burger duels, fan submissions, and an X collector that syncs to Cloudflare.
 
-## What Is Included
+**Live site:** https://summerofburgers.site
 
-- Cloudflare Pages-ready static site in `public/`
-- Pages Functions API in `functions/api/`
-- D1 schema in `migrations/0001_schema.sql`
-- Local X collector in `scripts/collector.cjs`
-- Local dev server in `scripts/dev-server.cjs`
-- Optional Windows scheduled task installer in `scripts/install-scheduled-task.ps1`
-- Anonymous browser voting limits backed by D1
-- Fan burger upload API backed by R2 and D1
-- Vote-specific share pages with Twitter Card images in `public/images/share/`
+Runs on a **Linux server** (systemd timer). No Windows scripts in this repo.
 
-The public site does not include personal owner details, personal domains, public analytics tags, submitter names, or submitter emails.
+## Server setup (one time)
 
-## Local Commands
+On your Linux box (e.g. `~/summer-of-burgers`):
 
-This machine's normal `node` command may not be available. Use the bundled Node runtime:
+```bash
+git clone https://github.com/NtrpyDev/summer-of-burgers.git
+cd summer-of-burgers
+cp .env.example .env
+# Edit .env — add X_BEARER_TOKEN from console.x.com
 
-```powershell
-$Node = Join-Path $HOME ".cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe"
-& $Node scripts\smoke-test.cjs
-& $Node scripts\dev-server.cjs
+npm install
+npx wrangler login
+bash scripts/linux/install-server.sh
 ```
 
-Then open:
+That installs a **30-minute** systemd user timer: collect tweets → AI burger check → sync R2/D1 → deploy Pages.
 
-```text
-http://localhost:8788
+Logs: `data/collector-schedule.log`
+
+## Daily commands
+
+```bash
+cd ~/summer-of-burgers
+
+# Manual full run (same as the timer)
+bash scripts/linux/collect-and-sync.sh
+
+# Check timer + recent log
+bash scripts/linux/collector-status.sh
+
+# Test X API
+bash scripts/linux/check-x-api.sh
+
+# One tweet
+bash scripts/linux/collector.sh --tweet "https://x.com/BarstoolBigCat/status/PASTE_ID"
+
+# Push code to GitHub (PII scan first)
+bash scripts/linux/push-github.sh
 ```
 
-## Collector Setup
+## How collection works
 
-The live site does **not** watch X by itself. New Big Cat tweets are pulled on **your PC** via the **X API**, then pushed to Cloudflare with sync.
+X does **not** push to your server. The timer **polls** for new `@BarstoolBigCat` image tweets, runs **CLIP vision** to keep burger photos only, then uploads to Cloudflare. Usually within ~30 minutes of a tweet, not instant.
 
-1. Copy `.env.example` to `.env`
-2. Paste your **Bearer Token** from [console.x.com](https://console.x.com) → Apps → `summer-of-burgers`
-3. Run:
+## Privacy
 
-```powershell
-.\scripts\collect-and-sync.cmd
-```
+The public site has no owner PII, analytics, submitter names, or emails. Votes use a salted hash of a random browser token (`VOTE_SALT` in Cloudflare). Fan upload IPs are hashed, not stored raw.
 
-That checks **new** `@BarstoolBigCat` image tweets since the last run, runs a local **AI burger check** on each photo, imports burgers only, then uploads to R2/D1. Non-burger images are remembered in `data/collector-state.json` so they are not scanned again.
-
-One-time catch-up for anything missed since `2026-05-25`:
-
-```powershell
-.\scripts\collector.cmd --backfill
-.\scripts\sync-to-cloudflare.cmd
-```
-
-Optional: force one tweet through the scanner:
-
-```powershell
-.\scripts\collector.cmd --tweet "https://x.com/BarstoolBigCat/status/PASTE_ID"
-.\scripts\sync-to-cloudflare.cmd
-```
-
-List image tweets vs site / scanner memory:
-
-```powershell
-.\scripts\collector.cmd --list-campaign
-```
-
-First run downloads the vision model into `.cache/transformers` (one time).
-
-New images are written to:
-
-- `public/images/originals/`
-- `public/images/thumbs/`
-- `public/data/burgers.json`
-- `public/data/fan-burgers.json` for local fan submissions
-
-Failed imports are logged to `data/failed/retry-queue.json`.
-
-## Voting Rules
-
-- Big Cat Duel has one official counted result per anonymous browser token per Eastern calendar day.
-- Fan Duel has its own separate fan vote per anonymous browser token per Eastern calendar day.
-- The browser token is random and stored in localStorage. D1 stores only a salted hash of that token.
-
-## Automatic checks (no manual watching)
-
-X does **not** notify your PC when someone tweets. This project **polls the API** on a timer: “any new tweets since last run?” → download images → AI burger check → sync if yes.
-
-Install a Windows scheduled task (every **30 minutes** by default):
-
-```powershell
-.\scripts\install-scheduled-task.cmd
-```
-
-Custom interval (e.g. 15 minutes):
-
-```powershell
-.\scripts\install-scheduled-task.cmd 15
-```
-
-See if it’s installed and read recent run logs:
-
-```powershell
-.\scripts\collector-status.cmd
-```
-
-Logs append to `data/collector-schedule.log`. Your PC needs to be on (or sleeping with the task allowed to wake). Each run only hits **new** tweets thanks to `data/collector-state.json`.
-
-## 24/7 collector on Linux (CachyOS)
-
-From Windows (copies project + `.env` + wrangler login if present):
-
-```powershell
-node scripts\deploy-to-linux.cjs YOUR_LINUX_IP YOUR_LINUX_USER YOUR_SSH_PASSWORD
-```
-
-On the Linux PC, the systemd user timer runs every 30 minutes: `scripts/linux/collect-and-sync.sh`. Logs: `data/collector-schedule.log`.
-
-If sync fails with “not authenticated”, run once on Linux: `cd ~/summer-of-burgers && npx wrangler login`
-
-## Cloudflare Deployment
-
-If `wrangler`, `npm`, and `npx` are not on PATH, use the bundled tooling in this repo:
-
-```powershell
-.\scripts\bootstrap-tools.ps1
-.\node_modules\.bin\wrangler.cmd login
-.\scripts\predeploy.ps1
-.\scripts\sync-to-cloudflare.ps1
-.\scripts\deploy-pages.ps1
-```
-
-See [DEPLOY.md](DEPLOY.md) for dashboard-only steps, binding names, and the `VOTE_SALT` secret.
-
-Resources:
-
-1. Pages project `summer-of-burgers`
-2. D1 database `summer-of-burgers` bound as `DB`
-3. R2 bucket `summer-of-burgers-images` bound as `BURGER_IMAGES`
-4. Replace `database_id` in `wrangler.toml` after `wrangler d1 create`
-5. Set `VOTE_SALT` with `wrangler pages secret put`
-
-`sync-to-cloudflare.ps1` uploads local images (including `public/images/share/`) to R2, runs the D1 schema migration, exports `public/data/burgers.json` to `data/seed-burgers.sql`, and imports it into D1.
-
-## Share Cards
-
-Generate social cards after imports:
-
-```powershell
-$Node = Join-Path $HOME ".cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe"
-& $Node scripts\generate-share-cards.cjs
-```
-
-The live X share links point to `/share/official/<burger-id>` or `/share/fan/<burger-id>`, which expose `summary_large_image` Twitter Card metadata.
-
-## Filename Format
-
-Each imported image uses:
-
-```text
-YYYY-MM-DD__barstoolbigcat__tweet-<tweetId>__img-<index>__<category-or-caption-slug>.<ext>
-```
-
-Example:
-
-```text
-2026-05-25__barstoolbigcat__tweet-2059041294899347598__img-1__smashburger.jpg
-```
+See [DEPLOY.md](DEPLOY.md) for Cloudflare bindings and `VOTE_SALT`.

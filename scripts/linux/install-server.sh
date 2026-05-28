@@ -31,7 +31,7 @@ Persistent=true
 WantedBy=timers.target
 EOF
 
-chmod +x "$ROOT/scripts/linux/collect-and-sync.sh"
+chmod +x "$ROOT"/scripts/linux/*.sh
 systemctl --user daemon-reload
 systemctl --user enable --now summer-of-burgers-collector.timer
 systemctl --user status summer-of-burgers-collector.timer --no-pager || true
