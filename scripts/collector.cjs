@@ -67,7 +67,7 @@ async function main() {
     return;
   }
 
-  const failures = await readJson(retryFile, []);
+  let failures = await readJson(retryFile, []);
   const candidates = await collectCandidates(burgers, failures, state);
   const summary = {
     scanned: 0,
@@ -88,6 +88,7 @@ async function main() {
       if (result === "imported") summary.imported += 1;
       else if (result === "not-burger") summary.notBurger += 1;
       else summary.skipped += 1;
+      failures = removeFailure(failures, candidate);
       await saveState(state);
     } catch (error) {
       summary.failed += 1;
@@ -103,8 +104,8 @@ async function main() {
   }
 
   burgers.sort((a, b) => new Date(b.posted_at || 0) - new Date(a.posted_at || 0) || a.media_index - b.media_index);
-  await fs.writeFile(dataFile, `${JSON.stringify(burgers, null, 2)}\n`);
-  await fs.writeFile(retryFile, `${JSON.stringify(failures.slice(-200), null, 2)}\n`);
+  await writeJson(dataFile, burgers);
+  await writeJson(retryFile, failures.slice(-200));
   await saveState(state);
 
   console.log(
@@ -165,7 +166,7 @@ async function rebuildArchiveFromVision() {
   }
 
   burgers.sort((a, b) => new Date(b.posted_at || 0) - new Date(a.posted_at || 0) || a.media_index - b.media_index);
-  await fs.writeFile(dataFile, `${JSON.stringify(burgers, null, 2)}\n`);
+  await writeJson(dataFile, burgers);
   await saveState(state);
   const removed = await pruneOrphanImages(burgers);
   console.log(`Rebuild done: ${imported} burgers kept, ${notBurger} non-burger tweets dropped.`);
@@ -492,9 +493,26 @@ async function ensureDirs() {
 async function readJson(filePath, fallback) {
   try {
     return JSON.parse(await fs.readFile(filePath, "utf8"));
-  } catch {
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      throw new Error(`Could not read valid JSON from ${filePath}: ${error.message}`);
+    }
     return fallback;
   }
+}
+
+async function writeJson(filePath, value) {
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
+  await fs.writeFile(tempPath, `${JSON.stringify(value, null, 2)}\n`);
+  await fs.rename(tempPath, filePath);
+}
+
+function removeFailure(failures, candidate) {
+  return failures.filter((failure) => (
+    String(failure.tweetId || "") !== String(candidate.tweetId || "") ||
+    Number(failure.mediaIndex || 0) !== Number(candidate.mediaIndex || 0)
+  ));
 }
 
 function requirePackage(name) {

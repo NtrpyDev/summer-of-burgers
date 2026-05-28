@@ -16,14 +16,19 @@ async function loadState() {
       lastSeenTweetId: raw.lastSeenTweetId || null,
       processed: raw.processed && typeof raw.processed === "object" ? raw.processed : {}
     };
-  } catch {
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      throw new Error(`Could not read valid collector state from ${stateFile}: ${error.message}`);
+    }
     return { version: 1, lastSeenTweetId: null, processed: {} };
   }
 }
 
 async function saveState(state) {
   await fs.mkdir(path.dirname(stateFile), { recursive: true });
-  await fs.writeFile(stateFile, `${JSON.stringify(state, null, 2)}\n`);
+  const tempPath = `${stateFile}.${process.pid}.${Date.now()}.tmp`;
+  await fs.writeFile(tempPath, `${JSON.stringify(state, null, 2)}\n`);
+  await fs.rename(tempPath, stateFile);
 }
 
 function isProcessed(state, tweetId, mediaIndex) {
