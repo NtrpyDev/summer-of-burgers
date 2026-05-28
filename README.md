@@ -52,6 +52,6 @@ X does **not** push to your server. The timer **polls** for new `@BarstoolBigCat
 
 ## Privacy
 
-The public site has no owner PII, analytics, submitter names, or emails. Votes use a salted hash of a server-signed browser token (`VOTE_SALT` in Cloudflare), plus hashed per-network daily throttles. Fan upload IPs are hashed, not stored raw.
+The public site has no analytics, submitter names, or emails. Votes use a salted hash of a server-signed browser token (`VOTE_SALT` in Cloudflare), plus hashed per-network daily throttles. Fan upload IPs are hashed, not stored raw.
 
 See [DEPLOY.md](DEPLOY.md) for Cloudflare bindings and `VOTE_SALT`.
