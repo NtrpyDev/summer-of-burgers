@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="index,follow">
+    <meta name="description" content="A fan-built Summer of Burgers gallery and voting arena.">
+    <meta name="share-url" content="https://summerofburgers.site">
+    <link rel="canonical" href="https://summerofburgers.site/">
+    <title>Summer of Burgers</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="site-chrome">
+      <a class="brand" href="/" data-view-link="gallery">Summer of Burgers</a>
+      <nav class="tabs" aria-label="Primary">
+        <a class="tab is-active" href="/" data-view="gallery">Gallery</a>
+        <a class="tab" href="/duel" data-view="duel">Duel</a>
+        <a class="tab" href="/fan_burgers" data-view="fan">Fan Burgers</a>
+        <a class="tab" href="/leaderboard" data-view="leaderboard">Leaders</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="heroTitle">
+        <div id="heroBackdrop" class="hero-backdrop"></div>
+        <div class="hero-shade"></div>
+        <div class="hero-copy">
+          <p class="eyebrow">Unofficial Big Cat burger index</p>
+          <h1 id="heroTitle">Big Cat's Burger Battles</h1>
+          <div class="hero-stats" aria-label="Archive stats">
+            <span><strong id="statBurgerCount">0</strong> Big Cat burgers</span>
+            <span><strong id="statFanCount">0</strong> fan burgers</span>
+            <span><strong>1</strong> official vote per day</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="command-strip" aria-label="Search and voting status">
+        <label class="search">
+          <span>Search</span>
+          <input id="searchInput" type="search" placeholder="Caption, date, tag, tweet id">
+        </label>
+        <div id="dailyStatus" class="daily-status" aria-live="polite"></div>
+      </section>
+
+      <section id="galleryView" class="view is-active" aria-labelledby="galleryTitle">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Newest first</p>
+            <h2 id="galleryTitle">Big Cat Burger Roll</h2>
+          </div>
+          <p id="galleryCount" class="count-copy">Loading burgers...</p>
+        </div>
+        <div id="galleryGrid" class="gallery-grid"></div>
+      </section>
+
+      <section id="duelView" class="view" aria-labelledby="duelTitle">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Daily ranked pick</p>
+            <h2 id="duelTitle">Burger Duel</h2>
+          </div>
+          <button id="newDuelButton" class="secondary-button" type="button">New matchup</button>
+        </div>
+        <div id="duelNotice" class="vote-notice" hidden aria-live="polite"></div>
+        <div id="duelArena" class="duel-arena"></div>
+        <p id="duelMessage" class="game-message" aria-live="polite"></p>
+      </section>
+
+      <section id="fanView" class="view" aria-labelledby="fanTitle">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Community grill</p>
+            <h2 id="fanTitle">Fan Burgers</h2>
+          </div>
+        </div>
+
+        <div class="fan-layout">
+          <form id="fanForm" class="fan-form">
+            <label>
+              <span>Burger name</span>
+              <input id="fanTitleInput" name="title" type="text" maxlength="72" placeholder="Backyard double">
+            </label>
+            <label>
+              <span>Caption</span>
+              <textarea id="fanCaptionInput" name="caption" maxlength="240" placeholder="Char, sauce, cheese, whatever makes it sing"></textarea>
+            </label>
+            <label class="file-field">
+              <span>Image</span>
+              <input id="fanImageInput" name="image" type="file" accept="image/png,image/jpeg,image/webp" required>
+              <span class="file-drop">
+                <span class="file-drop-action">Choose burger image</span>
+                <strong id="fanImageName">No image selected</strong>
+              </span>
+              <span class="field-hint">JPG, PNG, or WebP · 200×200 min · 6MB max · 1 upload per day</span>
+            </label>
+            <button id="fanSubmitButton" class="primary-button" type="submit">Submit fan burger</button>
+            <p id="fanSubmitMessage" class="game-message" aria-live="polite"></p>
+          </form>
+
+          <div class="fan-duel-panel">
+            <div class="mini-head">
+              <p class="eyebrow">Separate fan ranking</p>
+              <button id="newFanDuelButton" class="secondary-button" type="button">New fan duel</button>
+            </div>
+            <div id="fanDuelArena" class="fan-duel-arena"></div>
+            <p id="fanDuelMessage" class="game-message" aria-live="polite"></p>
+          </div>
+        </div>
+
+        <div id="fanGrid" class="fan-grid"></div>
+      </section>
+
+      <section id="leaderboardView" class="view" aria-labelledby="leaderboardTitle">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Season heat</p>
+            <h2 id="leaderboardTitle">Leaderboards</h2>
+          </div>
+        </div>
+        <div class="leaderboard-layout">
+          <div>
+            <h3>Big Cat table</h3>
+            <div id="leaderboardList" class="leaderboard"></div>
+          </div>
+          <div>
+            <h3>Fan table</h3>
+            <div id="fanLeaderboardList" class="leaderboard"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="burgerDialog">
+      <button class="dialog-close" type="button" aria-label="Close details">x</button>
+      <div id="burgerDetails"></div>
+    </dialog>
+
+    <dialog id="voteDialog" class="vote-dialog">
+      <button class="vote-dialog-close" type="button" aria-label="Close vote confirmation">x</button>
+      <div id="voteDetails"></div>
+    </dialog>
+
+    <footer>
+      <p>Unofficial fan archive. Source posts stay linked. Fan submissions collect burger images only.</p>
+    </footer>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
