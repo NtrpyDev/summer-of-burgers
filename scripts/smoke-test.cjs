@@ -10,7 +10,6 @@ const required = [
   "public/data/fan-burgers.json",
   "functions/api/burgers.js",
   "functions/api/vote.js",
-  "functions/api/bracket.js",
   "functions/api/fan-burgers.js",
   "functions/api/fan-burgers/status.js",
   "functions/_lib/fan-upload.js",
