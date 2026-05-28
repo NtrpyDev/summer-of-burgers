@@ -112,7 +112,7 @@ Logs append to `data/collector-schedule.log`. Your PC needs to be on (or sleepin
 From Windows (copies project + `.env` + wrangler login if present):
 
 ```powershell
-node scripts\deploy-to-linux.cjs 192.168.1.167 glorgy2 YOUR_SSH_PASSWORD
+node scripts\deploy-to-linux.cjs YOUR_LINUX_IP YOUR_LINUX_USER YOUR_SSH_PASSWORD
 ```
 
 On the Linux PC, the systemd user timer runs every 30 minutes: `scripts/linux/collect-and-sync.sh`. Logs: `data/collector-schedule.log`.

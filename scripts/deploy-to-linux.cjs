@@ -3,10 +3,10 @@ const path = require("node:path");
 const { execSync } = require("node:child_process");
 const { Client } = require("ssh2");
 
-const host = process.argv[2] || "192.168.1.167";
-const user = process.argv[3] || "glorgy2";
+const host = process.argv[2];
+const user = process.argv[3];
 const password = process.argv[4];
-const remoteDir = process.argv[5] || "/home/glorgy2/summer-of-burgers";
+const remoteDir = process.argv[5] || "~/summer-of-burgers";
 
 if (!password) {
   console.error("Usage: node scripts/deploy-to-linux.cjs HOST USER PASSWORD [REMOTE_DIR]");
