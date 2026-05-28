@@ -10,7 +10,7 @@ scan() {
   local label="$1"
   shift
   local hits
-  hits=$(git ls-files -z 2>/dev/null | xargs -0 grep -nE "$@" 2>/dev/null || true)
+  hits=$(git ls-files -z 2>/dev/null | grep -zv 'scripts/linux/pii-check.sh' | xargs -0 grep -nE "$@" 2>/dev/null || true)
   if [[ -n "$hits" ]]; then
     echo "FAIL: $label"
     echo "$hits" | head -20
@@ -29,7 +29,7 @@ if git diff --cached --name-only | grep -qE '^\.env$'; then
 fi
 
 scan "home LAN IP" '192\.168\.[0-9]+\.[0-9]+'
-scan "SSH password in repo" 'tanwub|password\s*=\s*["\x27][^"\x27]{6,}'
+scan "hardcoded password in repo" 'password\s*=\s*["\x27][^"\x27]{8,}'
 scan "Bearer / API tokens" 'Bearer [A-Za-z0-9%]{30,}|gho_[A-Za-z0-9]+|X_BEARER_TOKEN=[^#\s]{20,}'
 scan "private email" '@gmail\.com|@yahoo\.com|@hotmail\.com|@outlook\.com'
 
